@@ -169,3 +169,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# locally built binary
+/kiwix-seeder_darwin_*
+/kiwix-seeder_linux_*
+/kiwix-seeder_win32_*

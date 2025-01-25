@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+        python: ["3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: x64
+
+      - name: Install dependencies (and project)
+        run: |
+          pip install -U pip
+          pip install -e .[test,scripts]
+
+      - name: Run the tests
+        run: inv coverage --args "-vvv"
+
+      - name: Upload coverage report to codecov
+        if: matrix.python == '3.12'
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  build_python:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: pyproject.toml
+          architecture: x64
+
+      - name: Ensure we can build Python targets
+        run: |
+          pip install -U pip build
+          python3 -m build --sdist --wheel

@@ -1,0 +1,25 @@
+name: Docker CD
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+
+  bittorrent-tracker:
+    name: Deploy Seeder Image
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3.4.0
+      - name: Publish Docker Image
+        uses: openzim/docker-publish-action@v10
+        with:
+          image-name: kiwix/bittorrent-seeder
+          on-master: latest
+          restrict-to: kiwix/seeder
+          registries: ghcr.io
+          credentials:
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
