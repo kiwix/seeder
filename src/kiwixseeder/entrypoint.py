@@ -46,17 +46,17 @@ _Examples:_
 
 > `--filename 'mali*'` matches a single ZIM:
 
-- `openZIM:mali-pour-les-nuls_fr_all: @ 2024-09-06 (61.54 MiB)`
+- `openZIM:mali-pour-les-nuls_fr_all:@2024-09-06 (61.54 MiB)`
 
 > `--filename 'mali*' --filename 'eleda*'` matches two ZIMs:
 
-- `openZIM:mali-pour-les-nuls_fr_all: @ 2024-09-06 (61.54 MiB)`
-- `openZIM:eleda.education_fr_fo-offline: @ 2023-10-29 (50.03 MiB)`
+- `openZIM:mali-pour-les-nuls_fr_all:@2024-09-06 (61.54 MiB)`
+- `openZIM:eleda.education_fr_fo-offline:@2023-10-29 (50.03 MiB)`
 
 > `--filename 'mali*' --filename 'eleda*' --lang fra` matches two ZIMs:
 
-- `openZIM:mali-pour-les-nuls_fr_all: @ 2024-09-06 (61.54 MiB)`
-- `openZIM:eleda.education_fr_fo-offline: @ 2023-10-29 (50.03 MiB)`
+- `openZIM:mali-pour-les-nuls_fr_all:@2024-09-06 (61.54 MiB)`
+- `openZIM:eleda.education_fr_fo-offline:@2023-10-29 (50.03 MiB)`
 
 > `--filename 'mali*' --filename 'eleda*' --lang bam` matches zero ZIM
 

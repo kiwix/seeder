@@ -44,7 +44,7 @@ class Runner:
             else:
                 raise exc
 
-        if self.fetch_catalog():
+        if self.fetch_catalog() and not context.dry_run:
             logger.info("Catalog has not changed since last run, exiting.")
             return 0
         catalog_size = self.catalog.nb_books
