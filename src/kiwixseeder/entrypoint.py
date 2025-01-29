@@ -21,21 +21,45 @@ from kiwixseeder.context import (
     DEFAULT_QBT_CONN,
     Context,
     QbtConnection,
-    SizeRange,
 )
-from kiwixseeder.utils import format_duration, format_size
+from kiwixseeder.utils import SizeRange, format_duration, format_size
 
 logger = Context.logger
 
 epilog = """
 ---
-## Keeping ZIMs
+## Filtering
 
-`--keep` allows you to keep seeding ZIMs after those drop out of the Catalog.
-The Catalog only exposes the latest version of a *Title*. With many *Titles* being \
-redone monthly.\n
-The webseeds (HTTP mirrors) only keep at most 2 versions of a *Title*.
-This option expects a
+Inputs are all *filters* meaning to reduce the number of matching ZIM to seed.
+This means that not entering any filters matches the whole Catalog (3,000+ ZIMs).
+Because seeding everything requires a lot of disk space, if you don't input any
+filter, you'll be prompted to confirm (use `--all-good` to silence it)
+
+Filters combines as:
+
+- If filter is not set or empty, it matches.
+- Evaluating a filter (filename, category, etc), if any value matches, it matches.
+- Evaluating all filters, if any filter (filaname, category, etc), if set and not \
+matching, it does not match.
+
+_Examples:_
+
+> `--filename 'mali*'` matches a single ZIM:
+
+- `openZIM:mali-pour-les-nuls_fr_all: @ 2024-09-06 (61.54 MiB)`
+
+> `--filename 'mali*' --filename 'eleda*'` matches two ZIMs:
+
+- `openZIM:mali-pour-les-nuls_fr_all: @ 2024-09-06 (61.54 MiB)`
+- `openZIM:eleda.education_fr_fo-offline: @ 2023-10-29 (50.03 MiB)`
+
+> `--filename 'mali*' --filename 'eleda*' --lang fra` matches two ZIMs:
+
+- `openZIM:mali-pour-les-nuls_fr_all: @ 2024-09-06 (61.54 MiB)`
+- `openZIM:eleda.education_fr_fo-offline: @ 2023-10-29 (50.03 MiB)`
+
+> `--filename 'mali*' --filename 'eleda*' --lang bam` matches zero ZIM
+
 
 ## Glob-patterns
 
@@ -54,6 +78,27 @@ Sample requests:
 - `wikipedia_fr_all_nopic_*` specific
 
 See https://docs.python.org/3/library/pathlib.html#pattern-language
+
+
+## Keeping ZIMs
+
+`--keep` allows you to keep seeding ZIMs after those drop out of the Catalog.
+The Catalog only exposes the latest version of a *Title*. Most *Titles* are redone \
+monthly.\n
+The webseeds (HTTP mirrors) only keep at most 2 versions of a *Title*.
+This option expects a duration with a period suffix(`d`: day, `w`: week, `m`: month)
+
+⚠️ Without `--keep`, torrents (and ZIMs) are removed as soon as they are not
+matched by your filters or leave the Catalog.
+
+## Samples
+
+| Sample                           | Request                                           |
+| -------------------------------- | --------------------------------------------------|
+| All Wikimedia ones in Bamanankan | `--lang bam --category 'wiki*'`                   |
+| All medicine selections          | `--filename '*_medicine_*'`                       |
+| All “Public” TED                 | `--category ted --title '*public*'`               |
+
 """
 
 
