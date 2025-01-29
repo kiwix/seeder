@@ -10,7 +10,7 @@ IMAGE="ghcr.io/kiwix/bittorrent-seeder:latest"      # docker image to use
 
 DATA_PATH=$(pwd)/kiwix-seeder                       # path to store ZIM files (and incomplete .!qB ones) in (there's no hierarchy)
 MAX_STORAGE="10GiB"									# maximum disk-space to use
-SLEEP_INTERVAL="5m"                                 # how long to pause in-between catalog checks when using --loop
+SLEEP_INTERVAL="1d"                                 # how long to pause in-between catalog checks
 DEBUG=""                                            # whether to print debug logs (set to 1 to enable)
 SEED_WHOLE_CATALOG=									# whether to continue if filters (or lack of) end up seeding the whole catalog (prevents accidental no-filter launch)
 
@@ -18,12 +18,14 @@ SEED_WHOLE_CATALOG=									# whether to continue if filters (or lack of) end up
 # FILTERS
 # - use glob-patterns
 # - split using pipe (|)
-# - combined with same filter
+# See usage (kiwix-seeder --help) for details
 FILENAMES=""										# matching filename (filepath actually)
 LANGUAGES=""										# matching language (ISO-639-3 language codes)
 CATEGORIES=""										# matching Category
-FLAVOURS=""											# matching Flavour metadata (nodet, mini, nopic, maxi)
+FLAVOURS=""											# matching Flavour metadata (mini, nopic, maxi)
 TAGS=""												# containing following tag(s)
+TITLES=""										    # matching Title metadata
+DESCRIPTIONS=""										# matching Description metadata
 AUTHORS=""											# matching Creator metadata
 PUBLISHERS=""										# matching Publisher metadata
 MIN_SIZE=""											# only ZIM larger than

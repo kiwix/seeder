@@ -151,9 +151,33 @@ def prepare_context(raw_args: list[str]) -> None:
         "--flavour",
         dest="flavours",
         action="append",
-        choices=["nodet", "mini", "nopic", "maxi"],
-        help="Only seed ZIMs of this flavour.\nCan be used multiple times."
-        "\nglob-pattern accepted.",
+        help="Only seed ZIMs of this flavour.\nCan be used multiple times.\n"
+        "You cant filter those without a flavour at the moment.",
+        choices=["mini", "nopic", "maxi"],
+        type=str,
+        default=[],
+        required=False,
+    )
+
+    parser.add_argument(
+        "--title",
+        dest="titles",
+        action="append",
+        help="Only seed ZIMs matching this Title metadata pattern.\n"
+        "Can be used multiple times.\n"
+        "glob-pattern accepted.",
+        type=str,
+        default=[],
+        required=False,
+    )
+
+    parser.add_argument(
+        "--description",
+        dest="descriptions",
+        action="append",
+        help="Only seed ZIMs matching this Description metadata pattern.\n"
+        "Can be used multiple times.\n"
+        "glob-pattern accepted.",
         type=str,
         default=[],
         required=False,

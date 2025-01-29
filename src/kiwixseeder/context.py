@@ -36,13 +36,15 @@ DEFAULT_KEEP_DURATION: float = humanfriendly.parse_timespan(
     os.getenv("KEEP_DURATION") or "12w"
 )
 DEFAULT_SLEEP_INTERVAL: float = humanfriendly.parse_timespan(
-    os.getenv("SLEEP_INTERVAL") or "5m"
+    os.getenv("SLEEP_INTERVAL") or "1d"
 )
 
 DEFAULT_FILTER_FILENAMES: set[str] = set_from_env("FILENAMES")
 DEFAULT_FILTER_LANGUAGES: set[str] = set_from_env("LANGUAGES")
 DEFAULT_FILTER_CATEGORIES: set[str] = set_from_env("CATEGORIES")
 DEFAULT_FILTER_FLAVOURS: set[str] = set_from_env("FLAVOURS")
+DEFAULT_FILTER_TITLES: set[str] = set_from_env("TITLES")
+DEFAULT_FILTER_DESCRIPTIONS: set[str] = set_from_env("DESCRIPTIONS")
 DEFAULT_FILTER_TAGS: set[str] = set_from_env("TAGS")
 DEFAULT_FILTER_AUTHORS: set[str] = set_from_env("AUTHORS")
 DEFAULT_FILTER_PUBLISHERS: set[str] = set_from_env("PUBLISHERS")
@@ -139,6 +141,8 @@ class Context:
     languages: set[str] = field(default_factory=lambda: DEFAULT_FILTER_LANGUAGES)
     categories: set[str] = field(default_factory=lambda: DEFAULT_FILTER_CATEGORIES)
     flavours: set[str] = field(default_factory=lambda: DEFAULT_FILTER_FLAVOURS)
+    titles: set[str] = field(default_factory=lambda: DEFAULT_FILTER_TITLES)
+    descriptions: set[str] = field(default_factory=lambda: DEFAULT_FILTER_DESCRIPTIONS)
     tags: set[str] = field(default_factory=lambda: DEFAULT_FILTER_TAGS)
     authors: set[str] = field(default_factory=lambda: DEFAULT_FILTER_AUTHORS)
     publishers: set[str] = field(default_factory=lambda: DEFAULT_FILTER_PUBLISHERS)

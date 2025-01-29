@@ -220,7 +220,7 @@ class Runner:
             return True
 
         for pattern in context.filenames:
-            if book.filepath.match(pattern):
+            if book.filepath.match(pattern.lower()):
                 return True
         return False
 
@@ -228,7 +228,7 @@ class Runner:
         if not context.languages:
             return True
         for lang_code in context.languages:
-            if lang_code in book.lang_codes:
+            if lang_code.lower() in book.lang_codes:
                 return True
         return False
 
@@ -236,7 +236,7 @@ class Runner:
         if not context.categories:
             return True
         for category_pattern in context.categories:
-            if fnmatch.fnmatch(book.category, category_pattern):
+            if fnmatch.fnmatch(book.category.lower(), category_pattern.lower()):
                 return True
         return False
 
@@ -244,7 +244,23 @@ class Runner:
         if not context.flavours:
             return True
         for flavour in context.flavours:
-            if flavour == book.flavour:
+            if flavour.lower() in book.flavour.lower():
+                return True
+        return False
+
+    def matches_title(self, book: Book) -> bool:
+        if not context.titles:
+            return True
+        for title_pattern in context.titles:
+            if fnmatch.fnmatch(book.title.lower(), title_pattern.lower()):
+                return True
+        return False
+
+    def matches_description(self, book: Book) -> bool:
+        if not context.descriptions:
+            return True
+        for description_pattern in context.descriptions:
+            if fnmatch.fnmatch(book.description.lower(), description_pattern.lower()):
                 return True
         return False
 
@@ -253,7 +269,7 @@ class Runner:
             return True
         for tag_pattern in context.tags:
             for tag in book.tags:
-                if fnmatch.fnmatch(tag, tag_pattern):
+                if fnmatch.fnmatch(tag.lower(), tag_pattern.lower()):
                     return True
         return False
 
@@ -261,7 +277,7 @@ class Runner:
         if not context.authors:
             return True
         for author_pattern in context.authors:
-            if fnmatch.fnmatch(book.author, author_pattern):
+            if fnmatch.fnmatch(book.author.lower(), author_pattern.lower()):
                 return True
         return False
 
@@ -269,7 +285,7 @@ class Runner:
         if not context.publishers:
             return True
         for publisher_pattern in context.publishers:
-            if fnmatch.fnmatch(book.publisher, publisher_pattern):
+            if fnmatch.fnmatch(book.publisher.lower(), publisher_pattern.lower()):
                 return True
         return False
 
@@ -282,6 +298,8 @@ class Runner:
             "lang",
             "category",
             "flavour",
+            "title",
+            "description",
             "tag",
             "author",
             "publisher",
