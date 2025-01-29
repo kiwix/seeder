@@ -38,9 +38,7 @@ class SizeRange:
 
     def is_below_max(self, value: int) -> bool:
         """whether value is lower-or-equal than our maximum"""
-        if self.maximum == nd:
-            return True
-        return value <= self.maximum
+        return self.maximum == nd or value <= self.maximum
 
     def match(self, value: int) -> bool:
         """whether value is within the bounds of the range"""

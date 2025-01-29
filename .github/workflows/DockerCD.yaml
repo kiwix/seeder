@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  bittorrent-tracker:
+  bittorrent-seeder:
     name: Deploy Seeder Image
     runs-on: ubuntu-22.04
     steps:
