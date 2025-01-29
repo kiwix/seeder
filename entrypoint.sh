@@ -1,22 +1,22 @@
 #!/bin/bash
 
 function configure_qbt {
-	QBITTORRENT_CONFIG_FILE=/root/.config/qBittorrent/qBittorrent.conf
-	QBT_CONFIG_FILE=/root/.qbt/settings.json
 
 	QBT_HOST="${QBT_HOST:-localhost}"
 	QBT_PORT="${QBT_PORT:-80}"
 	QBT_USERNAME="${QBT_USERNAME:-admin}"
+	QBT_CONFIG_FILE=/root/.config/qBittorrent/qBittorrent.conf
 
 	# configure qbittorrent-cli (qbt)
-	if [ ! -f "$QBT_CONFIG_FILE" ]; then
+	QBT_CLI_CONFIG_FILE=/root/.qbt/settings.json
+	if [ ! -f "$QBT_CLI_CONFIG_FILE" ]; then
 		qbt settings set url "http://${QBT_HOST}:${QBT_PORT}"
 		qbt settings set username "${QBT_USERNAME}"
 		echo "${QBT_PASSWORD}" | qbt settings set password -y
 	fi
 
-	if [ -f "$QBITTORRENT_CONFIG_FILE" ] ; then
-		echo "Found existing qBittorrent config file at $QBITTORRENT_CONFIG_FILE"
+	if [ -f "$QBT_CONFIG_FILE" ] ; then
+		echo "Found existing qBittorrent config file at $QBT_CONFIG_FILE"
 		echo "Assuming persistent installation ; skipping configuration."
 		return
 	fi
@@ -35,8 +35,8 @@ function configure_qbt {
 	fi
 	PKBF2_PASSWORD=$(get-pbkdf2 "${QBT_PASSWORD}")
 
-	mkdir -p $(dirname $QBITTORRENT_CONFIG_FILE)
-	cat <<EOF > $QBITTORRENT_CONFIG_FILE
+	mkdir -p $(dirname $QBT_CONFIG_FILE)
+	cat <<EOF > $QBT_CONFIG_FILE
 [BitTorrent]
 MergeTrackersEnabled=true
 Session\DefaultSavePath=/data
