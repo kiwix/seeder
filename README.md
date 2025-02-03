@@ -6,7 +6,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![codecov](https://codecov.io/gh/kiwix/seeder/branch/main/graph/badge.svg)](https://codecov.io/gh/kiwix/seeder)
 ![PyPI - Python Version](https://img.shields.io/badge/python-3.12+-blue)
-[![Docker](https://ghcr-badge.egpl.dev/kiwix/bittorrent-seeder/latest_tag?label=docker)](https://ghcr.io/kiwix/bittorrent-seeder/)
+[![Docker](https://ghcr-badge.egpl.dev/kiwix/bittorrent-seeder/latest_tag?label=docker&ignore=)](https://ghcr.io/kiwix/bittorrent-seeder/)
 
 It's composed of a script that runs periodically and which consists mostly in:
 
