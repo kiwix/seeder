@@ -161,7 +161,7 @@ class Runner:
         # keep those that are within --keep duration
         keep_until = self.now - datetime.timedelta(seconds=context.keep_for)
         for btih in unselected_books:
-            if self.manager.get(btih).added_on >= keep_until:
+            if self.manager.get(btih).added_on <= keep_until:
                 unselected_books.remove(btih)
 
         if not len(unselected_books):
