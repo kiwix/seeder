@@ -9,33 +9,36 @@ CONTAINER_NAME="seeder"                             # name of docker container
 IMAGE="ghcr.io/kiwix/bittorrent-seeder:latest"      # docker image to use
 
 DATA_PATH=$(pwd)/kiwix-seeder                       # path to store ZIM files (and incomplete .!qB ones) in (there's no hierarchy)
-MAX_STORAGE="10GiB"									# maximum disk-space to use
+MAX_STORAGE="10GiB"                                 # maximum disk-space to use
 SLEEP_INTERVAL="1d"                                 # how long to pause in-between catalog checks
 DEBUG=""                                            # whether to print debug logs (set to 1 to enable)
-SEED_WHOLE_CATALOG=									# whether to continue if filters (or lack of) end up seeding the whole catalog (prevents accidental no-filter launch)
+SEED_WHOLE_CATALOG=                                 # whether to continue if filters (or lack of) end up seeding the whole catalog (prevents accidental no-filter launch)
 
 #
 # FILTERS
 # - use glob-patterns
 # - split using pipe (|)
 # See usage (kiwix-seeder --help) for details
-FILENAMES=""										# matching filename (filepath actually)
-LANGUAGES=""										# matching language (ISO-639-3 language codes)
-CATEGORIES=""										# matching Category
-FLAVOURS=""											# matching Flavour metadata (mini, nopic, maxi)
-TAGS=""												# containing following tag(s)
-TITLES=""										    # matching Title metadata
-DESCRIPTIONS=""										# matching Description metadata
-AUTHORS=""											# matching Creator metadata
-PUBLISHERS=""										# matching Publisher metadata
-MIN_SIZE=""											# only ZIM larger than
-MAX_SIZE=""											# only ZIM smaller than
+FILENAMES=""                                        # matching filename (filepath actually)
+LANGUAGES=""                                        # matching language (ISO-639-3 language codes)
+CATEGORIES=""                                       # matching Category
+FLAVOURS=""                                         # matching Flavour metadata (mini, nopic, maxi)
+TAGS=""                                             # containing following tag(s)
+TITLES=""                                           # matching Title metadata
+DESCRIPTIONS=""                                     # matching Description metadata
+AUTHORS=""                                          # matching Creator metadata
+PUBLISHERS=""                                       # matching Publisher metadata
+MIN_SIZE=""                                         # only ZIM larger than
+MAX_SIZE=""                                         # only ZIM smaller than
 
 # the following applies to those using the in-container qBittorrent
 # If using a remote qBittorrent instance, see NO_DEAMON below
 QBT_TORRENTING_PORT=6901                            # port to use for bittorrent. **MUST** be manually opened and forwarded to this host's IP as uPNP would not work accross docker
 QBT_PASSWORD=""                                     # qBittorrent WebUI password. If empty, one will be gen and printed
 WEBUI_PORT=8000                                     # port on this host to map to the qBittorrent WebUI (so you can monitor it)
+WEBUI_SSL=                                          # `y` to make webui https instead of http
+WEBUI_SSL_CERT=localhost.crt                        # filename (inside $DATA_PATH/certs) to the certificate to use for webui (if ssl enabled)
+WEBUI_SSL_KEY=localhost.key                         # filename (inside $DATA_PATH/certs) to the certificate key to use for webui (if ssl enabled)
 # qBittorrent connection settings (defaults copied from qBittorrent)
 QBT_MAX_CONNECTIONS=500
 QBT_MAX_CONNECTIONS_PER_TORRENT=100
@@ -69,6 +72,7 @@ docker run \
     -v $DATA_PATH/cache:/root/.config/kiwix-seeder \
     -v $DATA_PATH/qbittorent-cache:/root/.cache/qBittorrent \
     -v $DATA_PATH/qbittorent-share:/root/.local/share/qBittorrent \
+    -v $DATA_PATH/certs:/certs \
     -p $QBT_TORRENTING_PORT:$QBT_TORRENTING_PORT \
     -p $QBT_TORRENTING_PORT:$QBT_TORRENTING_PORT/udp \
     -p $WEBUI_PORT:80 \
@@ -92,6 +96,9 @@ docker run \
     -e QBT_MAX_ACTIVE_CHECKING_TORRENTS="${QBT_MAX_ACTIVE_CHECKING_TORRENTS}" \
     -e MAX_STORAGE="${MAX_STORAGE}" \
     -e SLEEP_INTERVAL="${SLEEP_INTERVAL}" \
+    -e WEBUI_SSL="${WEBUI_SSL}" \
+    -e WEBUI_SSL_CERT="/certs/${WEBUI_SSL_CERT}" \
+    -e WEBUI_SSL_KEY="/certs/${WEBUI_SSL_KEY}" \
     --restart unless-stopped \
     --detach \
     -it \

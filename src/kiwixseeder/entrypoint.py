@@ -141,6 +141,15 @@ def prepare_context(raw_args: list[str]) -> None:
     )
 
     parser.add_argument(
+        "-k",
+        "--insecure",
+        dest="qbt_insecure",
+        help="Disable SSL verification while communicating with qBittorrent.",
+        default=Context.qbt_insecure,
+        action="store_true",
+    )
+
+    parser.add_argument(
         "--dry-run",
         dest="dry_run",
         help="Dry-run mode: no torrent will be added/removed to/from qBittorrent. "
@@ -334,10 +343,13 @@ def prepare_context(raw_args: list[str]) -> None:
     conn = QbtConnection.using(args_dict["qbt_url"])
     args_dict["qbt"] = (
         qbittorrentapi.Client(  # pyright: ignore [reportUnknownMemberType]
-            host=conn.host,
+            host=f"{conn.scheme}://{conn.host}",
             port=conn.port,
             username=conn.username,
             password=conn.password,
+            VERIFY_WEBUI_CERTIFICATE=not args_dict.get(
+                "qbt_insecure", parser.get_default("qbt_insecure")
+            ),
         )
     )
     del args_dict["qbt_url"]

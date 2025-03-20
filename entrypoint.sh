@@ -5,6 +5,14 @@ function configure_qbt {
 	QBT_HOST="${QBT_HOST:-localhost}"
 	QBT_PORT="${QBT_PORT:-80}"
 	QBT_USERNAME="${QBT_USERNAME:-admin}"
+
+	# WEBUI_SSL=y enables SSL on WEB_UI and --insecure on kiwix-seeder
+	if [[ "${WEBUI_SSL}" = "y" ]]; then
+		websslvalue="true"
+		export QBT_INSECURE=y
+	else
+		websslvalue="false"
+	fi
 	QBT_CONFIG_FILE=/root/.config/qBittorrent/qBittorrent.conf
 
 	# configure qbittorrent-cli (qbt)
@@ -36,6 +44,7 @@ function configure_qbt {
 	PKBF2_PASSWORD=$(get-pbkdf2 "${QBT_PASSWORD}")
 
 	mkdir -p $(dirname $QBT_CONFIG_FILE)
+
 	cat <<EOF > $QBT_CONFIG_FILE
 [BitTorrent]
 MergeTrackersEnabled=true
@@ -60,6 +69,9 @@ MigrationVersion=8
 [Preferences]
 General\Locale=en
 WebUI\Enabled=true
+WebUI\HTTPS\Enabled=${websslvalue}
+WebUI\HTTPS\CertificatePath=${WEBUI_SSL_CERT}
+WebUI\HTTPS\KeyPath=${WEBUI_SSL_KEY}
 WebUI\Port=${QBT_PORT}
 WebUI\Username=${QBT_USERNAME}
 WebUI\Password_PBKDF2="@ByteArray(${PKBF2_PASSWORD})"

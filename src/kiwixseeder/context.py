@@ -29,8 +29,10 @@ DOWNLOAD_URL = os.getenv("DOWNLOAD_URL", "https://download.kiwix.org")
 
 DEFAULT_QBT_USERNAME: str | None = os.getenv("QBT_USERNAME")
 DEFAULT_QBT_PASSWORD: str | None = os.getenv("QBT_PASSWORD")
+DEFAULT_QBT_SCHEME: str = os.getenv("DEFAULT_QBT_SCHEME") or "http"
 DEFAULT_QBT_HOST: str = os.getenv("QBT_HOST") or "localhost"
 DEFAULT_QBT_PORT: int = int(os.getenv("QBT_PORT") or "8080")
+DEFAULT_QBT_INSECURE: bool = bool(os.getenv("QBT_INSECURE"))
 DEFAULT_MAX_STORAGE: int = humanfriendly.parse_size(os.getenv("MAX_STORAGE") or "10GiB")
 DEFAULT_KEEP_DURATION: float = humanfriendly.parse_timespan(
     os.getenv("KEEP_DURATION") or "12w"
@@ -73,6 +75,7 @@ class QbtConnection:
 
     username: str | None
     password: str | None
+    scheme: str
     host: str
     port: int
 
@@ -85,13 +88,14 @@ class QbtConnection:
         return cls(
             username=uri.username,
             password=uri.password,
+            scheme=uri.scheme,
             host=uri.hostname or "localhost",
             port=uri.port or 80,
         )
 
     def __str__(self) -> str:
         return ParseResult(
-            scheme="http",
+            scheme=self.scheme,
             netloc=f"{self.username or ''}"
             f"{':' if self.password else ''}{self.password or ''}"
             f"@{self.host}:{self.port}",
@@ -108,6 +112,7 @@ DEFAULT_QBT_CONN = str(
     else QbtConnection(
         username=DEFAULT_QBT_USERNAME,
         password=DEFAULT_QBT_PASSWORD,
+        scheme=DEFAULT_QBT_SCHEME,
         host=DEFAULT_QBT_HOST,
         port=DEFAULT_QBT_PORT,
     )
@@ -135,6 +140,7 @@ class Context:
     catalog_url: str = CATALOG_URL
     download_url: str = DOWNLOAD_URL
     qbt: qbittorrentapi.Client
+    qbt_insecure: bool = DEFAULT_QBT_INSECURE
 
     # filters
     filenames: set[str] = field(default_factory=lambda: DEFAULT_FILTER_FILENAMES)
