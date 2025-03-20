@@ -44,7 +44,7 @@ function configure_qbt {
 	cat <<EOF > $QBT_CONFIG_FILE
 [BitTorrent]
 MergeTrackersEnabled=true
-Session\DefaultSavePath=/data
+Session\DefaultSavePath=/data/files
 Session\AddExtensionToIncompleteFiles=true
 Session\MaxConnections=${QBT_MAX_CONNECTIONS}
 Session\MaxConnectionsPerTorrent=${QBT_MAX_CONNECTIONS_PER_TORRENT}
