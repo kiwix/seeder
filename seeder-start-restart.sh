@@ -13,6 +13,7 @@ MAX_STORAGE="10GiB"                                 # maximum disk-space to use
 SLEEP_INTERVAL="1d"                                 # how long to pause in-between catalog checks
 DEBUG=""                                            # whether to print debug logs (set to 1 to enable)
 SEED_WHOLE_CATALOG=                                 # whether to continue if filters (or lack of) end up seeding the whole catalog (prevents accidental no-filter launch)
+PERSIST_QBT_CONFIG=                                 # `y` to reuse (ie. not overwrite) an existing qBittorrent config. This means changes to config via WebUI persists for instance.
 
 #
 # FILTERS
@@ -65,6 +66,11 @@ docker rm --force $CONTAINER_NAME
 echo ">pulling image $IMAGE…"
 docker pull $IMAGE
 
+docker_run_opts=
+if [[ "${PERSIST_QBT_CONFIG}" = "y" ]]; then
+    docker_run_opts="-v ${DATA_PATH}/qbittorrent-config:/root/.config/qBittorrent"
+fi
+
 echo ">starting seeder container"
 docker run \
     --name $CONTAINER_NAME \
@@ -73,6 +79,7 @@ docker run \
     -v $DATA_PATH/qbittorent-cache:/root/.cache/qBittorrent \
     -v $DATA_PATH/qbittorent-share:/root/.local/share/qBittorrent \
     -v $DATA_PATH/certs:/certs \
+    $docker_run_opts \
     -p $QBT_TORRENTING_PORT:$QBT_TORRENTING_PORT \
     -p $QBT_TORRENTING_PORT:$QBT_TORRENTING_PORT/udp \
     -p $WEBUI_PORT:80 \
