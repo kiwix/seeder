@@ -9,11 +9,11 @@ function configure_qbt {
 	# WEBUI_SSL=y enables SSL on WEB_UI and --insecure on kiwix-seeder
 	if [[ "${WEBUI_SSL}" = "y" ]]; then
 		websslvalue="true"
-		qbtcli_scheme="https"
+		webuischeme="https"
 		export QBT_INSECURE=y
 		export QBT_SCHEME=https
 	else
-		qbtcli_scheme="http"
+		webuischeme="http"
 		websslvalue="false"
 		export QBT_SCHEME=http
 	fi
@@ -102,7 +102,7 @@ EOF
 	if [[ "${WEBUI_SSL}" = "y" ]]; then
 		qbt network settings --ignore-certificate-errors TRUE
 	fi
-	qbt settings set url "${qbtcli_scheme}://${QBT_HOST}:${QBT_PORT}/"
+	qbt settings set url "${webuischeme}://${QBT_HOST}:${QBT_PORT}/"
 	qbt settings set username "${QBT_USERNAME}"
 	echo "${QBT_PASSWORD}" | qbt settings set password -y
 
@@ -123,10 +123,15 @@ cat <<EOF > /etc/monitrc
 # nb of seconds between checks
 set daemon  30
 set log /dev/stdout
+set ssl options { verify: disable }
 
 CHECK PROCESS qbittorrent MATCHING qbittorrent-nox
     start = "${qbt_command}" with timeout 20 seconds
-    if failed host localhost port 80 protocol http and request "/" then start
+    if failed
+		host ${QBT_HOST}
+		port ${QBT_PORT}
+		protocol ${webuischeme} and request "/"
+	then start
 
 
 EOF
