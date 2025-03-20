@@ -9,9 +9,13 @@ function configure_qbt {
 	# WEBUI_SSL=y enables SSL on WEB_UI and --insecure on kiwix-seeder
 	if [[ "${WEBUI_SSL}" = "y" ]]; then
 		websslvalue="true"
+		qbtcli_scheme="https"
 		export QBT_INSECURE=y
+		export QBT_SCHEME=https
 	else
+		qbtcli_scheme="http"
 		websslvalue="false"
+		export QBT_SCHEME=http
 	fi
 	QBT_CONFIG_FILE=/root/.config/qBittorrent/qBittorrent.conf
 
@@ -95,7 +99,10 @@ GUI\Notifications\TorrentAdded=false
 EOF
 
 	# configure qbittorrent-cli (qbt)
-	qbt settings set url "http://${QBT_HOST}:${QBT_PORT}"
+	if [[ "${WEBUI_SSL}" = "y" ]]; then
+		qbt network settings --ignore-certificate-errors TRUE
+	fi
+	qbt settings set url "${qbtcli_scheme}://${QBT_HOST}:${QBT_PORT}/"
 	qbt settings set username "${QBT_USERNAME}"
 	echo "${QBT_PASSWORD}" | qbt settings set password -y
 
@@ -125,6 +132,10 @@ CHECK PROCESS qbittorrent MATCHING qbittorrent-nox
 EOF
 	chmod 700 /etc/monitrc
 	/usr/bin/monit -c /etc/monitrc
+	# given a few seconds to qBittorrent to start before staring the loop
+	# as the loop has no fancy retry mechanism ATM and will wait sleep_interval (long)
+	# before re-trying
+	sleep 3
 fi
 
 

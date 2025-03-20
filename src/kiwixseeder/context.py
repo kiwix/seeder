@@ -29,7 +29,7 @@ DOWNLOAD_URL = os.getenv("DOWNLOAD_URL", "https://download.kiwix.org")
 
 DEFAULT_QBT_USERNAME: str | None = os.getenv("QBT_USERNAME")
 DEFAULT_QBT_PASSWORD: str | None = os.getenv("QBT_PASSWORD")
-DEFAULT_QBT_SCHEME: str = os.getenv("DEFAULT_QBT_SCHEME") or "http"
+DEFAULT_QBT_SCHEME: str = os.getenv("QBT_SCHEME") or "http"
 DEFAULT_QBT_HOST: str = os.getenv("QBT_HOST") or "localhost"
 DEFAULT_QBT_PORT: int = int(os.getenv("QBT_PORT") or "8080")
 DEFAULT_QBT_INSECURE: bool = bool(os.getenv("QBT_INSECURE"))
