@@ -19,14 +19,6 @@ function configure_qbt {
 	fi
 	QBT_CONFIG_FILE=/root/.config/qBittorrent/qBittorrent.conf
 
-	# configure qbittorrent-cli (qbt)
-	QBT_CLI_CONFIG_FILE=/root/.qbt/settings.json
-	if [ ! -f "$QBT_CLI_CONFIG_FILE" ]; then
-		qbt settings set url "http://${QBT_HOST}:${QBT_PORT}"
-		qbt settings set username "${QBT_USERNAME}"
-		echo "${QBT_PASSWORD}" | qbt settings set password -y
-	fi
-
 	if [ -f "$QBT_CONFIG_FILE" ] ; then
 		echo "Found existing qBittorrent config file at $QBT_CONFIG_FILE"
 		echo "Assuming persistent installation ; skipping configuration."
