@@ -8,7 +8,7 @@ RUN set -e \
     && apt-get install -y --no-install-recommends \
         dumb-init curl apt-transport-https ca-certificates gnupg2 \
     # the daemon with webui \
-    && curl -L -o /usr/bin/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-5.0.3_v2.0.10/x86_64-qbittorrent-nox \
+    && curl -L -o /usr/bin/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-5.0.4_v2.0.11/x86_64-qbittorrent-nox \
     && chmod +x /usr/bin/qbittorrent-nox \
     && curl -L -o monit.tar.gz https://mmonit.com/monit/dist/binary/5.34.4/monit-5.34.4-linux-x64.tar.gz \
     && tar xf monit.tar.gz \
