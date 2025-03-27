@@ -100,22 +100,18 @@ FileLogger\Path=/data/log
 GUI\Notifications\TorrentAdded=false
 
 EOF
-
 }
 
 
 if [ "x${NO_QBT}" = "x" ]; then
-    configure_qbt
-    qbt_command="/usr/bin/qbittorrent-nox --daemon"
+	configure_qbt
+	echo "Starting a qbittorrent-nox process (set NO_QBT if you dont want to)"
+	/usr/bin/qbittorrent-nox --daemon
 
-    echo "Starting a qbittorrent-nox process (set NO_QBT if you dont want to)"
-
-    $qbt_command
-
-    # give a few seconds to qBittorrent to start before staring the loop
-    # as the loop has no fancy retry mechanism ATM and will wait sleep_interval (long)
-    # before re-trying
-    sleep 3
+	# give a few seconds to qBittorrent to start before staring the loop
+	# as the loop has no fancy retry mechanism ATM and will wait sleep_interval (long)
+	# before re-trying
+	sleep 3
 fi
 
 
