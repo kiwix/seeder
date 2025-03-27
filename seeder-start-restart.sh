@@ -76,8 +76,8 @@ docker run \
     --name $CONTAINER_NAME \
     -v $DATA_PATH:/data \
     -v $DATA_PATH/cache:/root/.config/kiwix-seeder \
-    -v $DATA_PATH/qbittorent-cache:/root/.cache/qBittorrent \
-    -v $DATA_PATH/qbittorent-share:/root/.local/share/qBittorrent \
+    -v $DATA_PATH/qbittorrent-cache:/root/.cache/qBittorrent \
+    -v $DATA_PATH/qbittorrent-share:/root/.local/share/qBittorrent \
     -v $DATA_PATH/certs:/certs \
     $docker_run_opts \
     -p $QBT_TORRENTING_PORT:$QBT_TORRENTING_PORT \
