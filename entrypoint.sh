@@ -1,6 +1,5 @@
 #!/bin/bash
 
-export QBT_SCHEME=http
 if [[ "${WEBUI_SSL}" = "y" ]]; then
 	export QBT_INSECURE=y
     export QBT_SCHEME=https
@@ -79,6 +78,7 @@ WebUI\Enabled=true
 WebUI\HTTPS\Enabled=${websslvalue}
 WebUI\HTTPS\CertificatePath=${WEBUI_SSL_CERT}
 WebUI\HTTPS\KeyPath=${WEBUI_SSL_KEY}
+WebUI\Address=${WEBUI_ADDRESS}
 WebUI\Port=${QBT_PORT}
 WebUI\Username=${QBT_USERNAME}
 WebUI\Password_PBKDF2="@ByteArray(${PKBF2_PASSWORD})"
