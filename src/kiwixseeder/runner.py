@@ -44,6 +44,11 @@ class Runner:
             else:
                 raise exc
 
+        # clear OPDS cache if requested
+        if context.clear_opds:
+            self.catalog.etag = ""
+            write_etag_to_cache("")
+
         if self.fetch_catalog() and not context.dry_run:
             logger.info("Catalog has not changed since last run, exiting.")
             return 0

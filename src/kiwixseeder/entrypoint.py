@@ -141,6 +141,16 @@ def prepare_context(raw_args: list[str]) -> None:
     )
 
     parser.add_argument(
+        "-C",
+        "--clear-opds",
+        dest="clear_opds",
+        help=f"Clear OPDS Cache. Use it to when relaunching {CLI_NAME} "
+        "while the Kiwix Catalog has not yet been refreshed",
+        default=Context.clear_opds,
+        action="store_true",
+    )
+
+    parser.add_argument(
         "-k",
         "--insecure",
         dest="qbt_insecure",

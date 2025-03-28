@@ -35,7 +35,15 @@ def main(args: list[str]) -> int:
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGQUIT, exit_gracefully)
 
+    first_launch = True
     while not exit_requested:
+        # clear the OPDS cache on forever start
+        # but only set it for subsequent calls if requested.
+        # clearing on start makes most sense
+        if first_launch and "--clear-opds" not in args and "-C" not in args:
+            args += ["--clear-opds"]
+            first_launch = False
+
         ps = subprocess.run(["/usr/bin/env", "kiwix-seeder", *args], check=False)
 
         if ps.returncode in (RC_NOFILTER, RC_INSUFFICIENT_STORAGE):

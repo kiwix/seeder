@@ -66,6 +66,7 @@ except humanfriendly.InvalidSize:
 DEFAULT_FILTER_FILESIZES: SizeRange = SizeRange(minimum=min_size, maximum=max_size)
 DEFAULT_DEBUG: bool = bool(os.getenv("DEBUG"))
 SEED_WHOLE_CATALOG: bool = bool(os.getenv("SEED_WHOLE_CATALOG"))
+DEFAULT_CLEAR_OPDS: bool = bool(os.getenv("CLEAR_OPDS"))
 
 # avoid debug-level logs of 3rd party deps
 for module in ("urllib3", "qbittorrentapi.request"):
@@ -166,6 +167,7 @@ class Context:
     max_storage: int = DEFAULT_MAX_STORAGE
     keep_for: float = DEFAULT_KEEP_DURATION
     all_good: bool = SEED_WHOLE_CATALOG
+    clear_opds: bool = DEFAULT_CLEAR_OPDS
 
     logger: logging.Logger = logging.getLogger(NAME)  # noqa: RUF009
     max_direct_online_resource_payload_size: int = 2048
