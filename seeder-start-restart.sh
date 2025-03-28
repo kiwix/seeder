@@ -36,7 +36,7 @@ MAX_SIZE=""                                         # only ZIM smaller than
 # If using a remote qBittorrent instance, see NO_DEAMON below
 QBT_TORRENTING_PORT=6901                            # port to use for bittorrent. **MUST** be manually opened and forwarded to this host's IP as uPNP would not work accross docker
 QBT_PASSWORD=""                                     # qBittorrent WebUI password. If empty, one will be gen and printed
-WEBUI_PORT=8000                                     # port on this host to map to the qBittorrent WebUI (so you can monitor it)
+WEBUI_PORT=8000                                     # port on this host to map to the qBittorrent WebUI (so you can monitor it). Empty to not expose Web UI
 WEBUI_SSL=                                          # `y` to make webui https instead of http
 WEBUI_SSL_CERT=localhost.crt                        # filename (inside $DATA_PATH/certs) to the certificate to use for webui (if ssl enabled)
 WEBUI_SSL_KEY=localhost.key                         # filename (inside $DATA_PATH/certs) to the certificate key to use for webui (if ssl enabled)
@@ -70,7 +70,11 @@ docker pull $IMAGE
 
 docker_run_opts=
 if [[ "${PERSIST_QBT_CONFIG}" = "y" ]]; then
-    docker_run_opts="-v ${DATA_PATH}/qbittorrent-config:/root/.config/qBittorrent"
+    docker_run_opts+=" -v ${DATA_PATH}/qbittorrent-config:/root/.config/qBittorrent"
+fi
+
+if [[ "${WEBUI_PORT}x" != "x" ]]; then
+    docker_run_opts+=" -p ${WEBUI_PORT}:80"
 fi
 
 echo ">starting seeder container"
@@ -84,7 +88,6 @@ docker run \
     $docker_run_opts \
     -p $QBT_TORRENTING_PORT:$QBT_TORRENTING_PORT \
     -p $QBT_TORRENTING_PORT:$QBT_TORRENTING_PORT/udp \
-    -p $WEBUI_PORT:80 \
     -e DEBUG="${DEBUG}" \
     -e SEED_WHOLE_CATALOG="${SEED_WHOLE_CATALOG}" \
     -e FILENAMES="${FILENAMES}" \
