@@ -48,7 +48,9 @@ QBT_MAX_UPLOADS_PER_TORRENT=5
 QBT_MAX_ACTIVE_CHECKING_TORRENTS=1
 # END OF CONFIG
 
-if [ -f /etc/seeder.config ]; then
+if [ -f ~/.config/seeder.config ]; then
+	source ~/.config/seeder.config
+elif [ -f /etc/seeder.config ]; then
     source /etc/seeder.config
 fi
 
