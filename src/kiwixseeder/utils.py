@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 
 import humanfriendly
@@ -11,6 +12,11 @@ def format_size(value: int) -> str:
 def format_duration(value: float) -> str:
     """human friendly duration"""
     return humanfriendly.format_timespan(value)
+
+
+def sleep_nonblocking(seconds: int | float):
+    for _ in range(0, int(seconds)):
+        time.sleep(1)
 
 
 nd = 0

@@ -41,6 +41,11 @@ DEFAULT_SLEEP_INTERVAL: float = humanfriendly.parse_timespan(
     os.getenv("SLEEP_INTERVAL") or "1d"
 )
 
+DEFAULT_BATCH_SIZE: int = int(os.getenv("BATCH_SIZE") or "100")
+DEFAULT_BATCH_INTERVAL: float = humanfriendly.parse_timespan(
+    os.getenv("BATCH_INTERVAL") or "1m"
+)
+
 DEFAULT_FILTER_FILENAMES: set[str] = set_from_env("FILENAMES")
 DEFAULT_FILTER_LANGUAGES: set[str] = set_from_env("LANGUAGES")
 DEFAULT_FILTER_CATEGORIES: set[str] = set_from_env("CATEGORIES")
@@ -136,6 +141,9 @@ class Context:
     is_mac: bool = platform.system() == "Darwin"
     is_win: bool = platform.system() == "Windows"
     is_nix: bool = platform.system() not in ("Darwin", "Windows")
+
+    batch_size: int = DEFAULT_BATCH_SIZE
+    batch_interval: float = DEFAULT_BATCH_INTERVAL
 
     catalog_url: str = CATALOG_URL
     download_url: str = DOWNLOAD_URL
