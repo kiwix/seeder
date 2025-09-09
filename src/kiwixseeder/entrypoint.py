@@ -86,7 +86,7 @@ See https://docs.python.org/3/library/pathlib.html#pattern-language
 The Catalog only exposes the latest version of a *Title*. Most *Titles* are redone \
 monthly.\n
 The webseeds (HTTP mirrors) only keep at most 2 versions of a *Title*.
-This option expects a duration with a period suffix(`d`: day, `w`: week, `m`: month)
+This option expects a duration with a period suffix(`d`: day, `w`: week, `y`: year)
 
 ⚠️ Without `--keep`, torrents (and ZIMs) are removed as soon as they are not
 matched by your filters or leave the Catalog.
