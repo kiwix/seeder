@@ -8,15 +8,15 @@
 ![PyPI - Python Version](https://img.shields.io/badge/python-3.12+-blue)
 [![Docker](https://ghcr-badge.egpl.dev/kiwix/bittorrent-seeder/latest_tag?label=docker&ignore=)](https://ghcr.io/kiwix/bittorrent-seeder/)
 
-It's composed of a script that runs periodically and which consists mostly in:
+It is composed of a script that runs periodically and which consists mostly in:
 
 - Downloading the Kiwix OPDS Catalog
 - Matching its entries with your defined filters
-- Communicates with your qBittorrent instance (via HTTP)
-  - Removes unwanted (not matching or out of Catalog) ZIMs from qBittorrent and filesystem
-  - Adds new matching ZIM to qBittorrent
+- Communicating with your qBittorrent instance (via HTTP)
+  - Removing unwanted (not matching or out of Catalog) ZIMs from qBittorrent and filesystem
+  - Adding new matching ZIM to qBittorrent
 
-It's goal is thus to command the qBittorrent instance to download new torrents (any
+Its goal is thus to command the qBittorrent instance to download new torrents (any
 new ZIM in the Catalog matching the filters) and remove old ones (previously
 added torrents that dont match current filters or are not in Catalog anymore)
 
