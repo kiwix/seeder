@@ -24,8 +24,8 @@ QBT_CAT_NAME = "kiwix-seeder"  # name of category to group our torrents in
 RC_NOFILTER = 32  # exit-code when user has no filter and did not confirm
 RC_INSUFFICIENT_STORAGE = 30  # exit-code when store is not enough for selection
 
-CATALOG_URL = os.getenv("CATALOG_URL", "https://library.kiwix.org/catalog/v2")
-DOWNLOAD_URL = os.getenv("DOWNLOAD_URL", "https://download.kiwix.org")
+CATALOG_URL = os.getenv("CATALOG_URL", "https://opds.library.kiwix.org/catalog/v2")
+DOWNLOAD_URL = os.getenv("DOWNLOAD_URL", "https://lb.download.kiwix.org")
 
 DEFAULT_QBT_USERNAME: str | None = os.getenv("QBT_USERNAME")
 DEFAULT_QBT_PASSWORD: str | None = os.getenv("QBT_PASSWORD")
