@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Self
 
 import qbittorrentapi
+from qbittorrentapi.torrents import TorrentsAddedMetadata
 
 from kiwixseeder.context import QBT_CAT_NAME, Context
 from kiwixseeder.download import get_btih_from_url
@@ -43,7 +44,6 @@ class TorrentInfo:
 
 
 class TorrentManager:
-
     def __init__(self) -> None:
         # maps {ident: str} to {btih: str}
         self.btihs: dict[str, str] = {}
@@ -87,9 +87,10 @@ class TorrentManager:
         # download_path
         try:
             btih = btih or get_btih_from_url(url)
-            if client.torrents.add(
-                urls=url, category=QBT_CAT_NAME
-            ) == "Ok." and self.get_or_none(btih, with_patience=True):
+            resp = client.torrents.add(urls=url, category=QBT_CAT_NAME)
+            if (
+                isinstance(resp, TorrentsAddedMetadata) or resp == "Ok."
+            ) and self.get_or_none(btih, with_patience=True):
                 return btih
             raise OSError(f"Failed to add torrent for {url}")
         finally:
