@@ -7,7 +7,13 @@ from kiwixseeder.context import (
     RC_NOFILTER,
     Context,
 )
-from kiwixseeder.library import Book, Catalog, query_etag, write_etag_to_cache
+from kiwixseeder.library import (
+    ETAG_CACHE_FILE,
+    Book,
+    Catalog,
+    query_etag,
+    write_etag_to_cache,
+)
 from kiwixseeder.qbittorrent import TorrentManager
 from kiwixseeder.utils import format_duration, format_size, sleep_nonblocking
 
@@ -16,7 +22,6 @@ logger = context.logger
 
 
 class Runner:
-
     def __init__(self) -> None:
         self.exit_requested: bool = False
         self.now = datetime.datetime.now(datetime.UTC)
@@ -50,13 +55,17 @@ class Runner:
             write_etag_to_cache("")
 
         if self.fetch_catalog() and not context.dry_run:
-            logger.info("Catalog has not changed since last run, exiting.")
+            logger.info(
+                "Catalog has not changed since last run, exiting "
+                f"–– {context.get_cache_path(ETAG_CACHE_FILE)}"  # noqa: RUF001
+            )
             return 0
         catalog_size = self.catalog.nb_books
         self.reduce_catalog()
 
         # make sure it's not an accidental no-param call
         books_size = sum(book.size for book in self.books)
+        logger.debug(f"Catalog size: {format_size(books_size)}")
         if len(self.books) == catalog_size and not context.all_good:
             logger.warning(
                 f"{self.banner}You requesting seeding {len(self.books)} torrents "
@@ -169,7 +178,7 @@ class Runner:
             if self.manager.get(btih).added_on <= keep_until:
                 unselected_books.remove(btih)
 
-        if not len(unselected_books):
+        if not unselected_books:
             logger.info("> None")
             return
 

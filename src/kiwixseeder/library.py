@@ -86,7 +86,9 @@ class Book:
     description: str
     author: str
     publisher: str
-    langs_iso639_1: list[str] = field(default_factory=list)
+    langs_iso639_1: list[str] = field(  # pyright: ignore[reportUnknownVariableType]
+        default_factory=list
+    )
     langs_iso639_3: list[str]
     tags: list[str]
     flavour: str

@@ -340,8 +340,7 @@ def prepare_context(raw_args: list[str]) -> None:
     )
     args_dict.update({"filesizes": SizeRange(minimum=min_size, maximum=max_size)})
     for key in ("min_size", "max_size"):
-        if key in args_dict:
-            del args_dict[key]
+        args_dict.pop(key, None)
 
     # storage
     args_dict["max_storage"] = humanfriendly.parse_size(args_dict["max_storage"])
@@ -371,7 +370,7 @@ def main() -> int:
     try:
         prepare_context(sys.argv[1:])
         # late import as to have an initialized Context
-        from kiwixseeder.runner import Runner
+        from kiwixseeder.runner import Runner  # noqa: PLC0415
 
         runner = Runner()
 
