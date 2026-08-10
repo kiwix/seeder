@@ -8,7 +8,7 @@ RUN set -e \
     && apt-get install -y --no-install-recommends \
         dumb-init curl apt-transport-https ca-certificates gnupg2 \
     # the daemon with webui \
-    && curl -L -o /usr/bin/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-5.0.4_v2.0.11/x86_64-qbittorrent-nox \
+    && curl -L -o /usr/bin/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-5.2.3_v2.0.13/x86_64-qbittorrent-nox \
     && chmod +x /usr/bin/qbittorrent-nox \
     # for convenience (qBittorrent-cli)
     && curl -L https://dl.cloudsmith.io/public/qbittorrent-cli/qbittorrent-cli/gpg.F8756541ADDA2B7D.key | apt-key add - \
