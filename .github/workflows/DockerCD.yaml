@@ -3,7 +3,7 @@ name: Docker CD
 on:
   push:
     branches:
-      - 'main'
+      - 'updates'
   workflow_dispatch:
 
 jobs:
@@ -20,6 +20,7 @@ jobs:
           on-master: latest
           restrict-to: kiwix/seeder
           registries: ghcr.io
+          manual-tag: updates
           credentials:
             GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
             GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
