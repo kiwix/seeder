@@ -229,17 +229,6 @@ class Runner:
             else:
                 logger.error(f"Failed to add {book!s}")
 
-            if (
-                len(self.books) > context.batch_size
-                and num < len(self.books) - 1
-                and (num + 1) % context.batch_size == 0
-            ):
-                logger.info(
-                    f"Pausing for {format_duration(context.batch_interval)} "
-                    f"after {context.batch_size} additions, to let qBittorrent breath"
-                )
-                sleep_nonblocking(context.batch_interval)
-
     def matches_filename(self, book: Book) -> bool:
         if not context.filenames:
             return True
