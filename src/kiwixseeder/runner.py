@@ -18,7 +18,7 @@ from kiwixseeder.library import (
     write_etag_to_cache,
 )
 from kiwixseeder.qbittorrent import TorrentManager
-from kiwixseeder.utils import format_duration, format_size, sleep_nonblocking
+from kiwixseeder.utils import format_size
 
 context = Context.get()
 logger = context.logger
@@ -225,7 +225,7 @@ class Runner:
                     self.books.remove(book)
             except HTTPError as exc:
                 self.books.remove(book)
-                if exc.response.status_code == HTTPStatus.NOT_FOUND:
+                if getattr(exc.response, "status_code", None) == HTTPStatus.NOT_FOUND:
                     logger.warning(
                         f"{HTTPStatus.NOT_FOUND!s} on {book.torrent_url}."
                         " Ignoring. See https://github.com/openzim/cms/issues/103"

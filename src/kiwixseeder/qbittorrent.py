@@ -77,7 +77,7 @@ class TorrentManager:
         for torrent in client.torrents.info(
             category=QBT_CAT_NAME, SIMPLE_RESPONSES=True
         ):
-            self.btihs[torrent["hash"]] = torrent["name"]
+            self.btihs[str(torrent["hash"])] = str(torrent["name"])
 
     @property
     def nb_torrents(self) -> int:
@@ -112,7 +112,7 @@ class TorrentManager:
     def get(self, ident: str) -> TorrentInfo:
         """Torrent dict from its hash"""
         return TorrentInfo.from_torrentdict(
-            client.torrents.info(torrent_hashes=ident, SIMPLE_RESPONSES=True)[0]
+            client.torrents.info(torrent_hashes=ident, SIMPLE_RESPONSES=True)[0]  # pyright: ignore[reportUnknownArgumentType, reportArgumentType]
         )
 
     def get_or_none(
