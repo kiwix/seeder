@@ -1,5 +1,8 @@
 import datetime
 import fnmatch
+from http import HTTPStatus
+
+from requests.exceptions import HTTPError
 
 from kiwixseeder.context import (
     QBT_CAT_NAME,
@@ -82,13 +85,15 @@ class Runner:
             return 0
 
         # read existing torrents from qbt
+        logger.info("Querying qBittorrent state…")
         self.manager.reload()
         logger.info(
             f"{self.banner}There are {self.manager.nb_torrents} torrents "
             f"in {QBT_CAT_NAME}"
         )
-        for btih in self.manager.btihs:
-            logger.debug(f"* {self.manager.get(btih)!s}")
+        if context.debug:
+            for btih in self.manager.btihs:
+                logger.debug(f"* {self.manager.get(btih)!s}")
 
         self.remove_outdated_torrents()
         self.reconcile_books_and_torrents()
@@ -214,9 +219,19 @@ class Runner:
         logger.info(
             "Reconciling books and torrents (may require btih endpoint requests)"
         )
-        self.books = [
-            book for book in self.books if book.btih not in self.manager.btihs
-        ]
+        for book in list(self.books):
+            try:
+                if book.btih in self.manager.btihs:
+                    self.books.remove(book)
+            except HTTPError as exc:
+                self.books.remove(book)
+                if exc.response.status_code == HTTPStatus.NOT_FOUND:
+                    logger.warning(
+                        f"{HTTPStatus.NOT_FOUND!s} on {book.torrent_url}."
+                        " Ignoring. See https://github.com/openzim/cms/issues/103"
+                    )
+                    continue
+                raise exc
 
     def add_books(self):
         logger.info(f"{self.banner}Adding {len(self.books)} torrents…")
