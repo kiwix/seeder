@@ -378,6 +378,7 @@ def main() -> int:
             print("\n", flush=True)  # noqa: T201
             logger.info(f"Received {signal.Signals(signum).name}/{signum}. Exiting")
             runner.stop()
+            sys.exit(2)
 
         signal.signal(signal.SIGTERM, exit_gracefully)
         signal.signal(signal.SIGINT, exit_gracefully)
