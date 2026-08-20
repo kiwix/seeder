@@ -26,6 +26,17 @@ class TorrentInfo:
     size: int
 
     @classmethod
+    def from_torrentdict(cls, tdict: dict[str, str | int]) -> Self:
+        return cls(
+            btih=str(tdict["hash"]),
+            filename=str(tdict["name"]),
+            added_on=datetime.datetime.fromtimestamp(
+                int(tdict["added_on"]), tz=datetime.UTC
+            ),
+            size=int(tdict["size"]),
+        )
+
+    @classmethod
     def from_torrentdictionary(cls, tdict: qbittorrentapi.TorrentDictionary) -> Self:
         return cls(
             btih=tdict.properties.hash,
@@ -63,8 +74,10 @@ class TorrentManager:
     def reload(self):
         """read torrents list from qbittorrent"""
         self.btihs.clear()
-        for torrent in client.torrents.info(category=QBT_CAT_NAME):
-            self.btihs[torrent.properties.hash] = torrent.properties.name
+        for torrent in client.torrents.info(
+            category=QBT_CAT_NAME, SIMPLE_RESPONSES=True
+        ):
+            self.btihs[torrent["hash"]] = torrent["name"]
 
     @property
     def nb_torrents(self) -> int:
@@ -98,8 +111,8 @@ class TorrentManager:
 
     def get(self, ident: str) -> TorrentInfo:
         """Torrent dict from its hash"""
-        return TorrentInfo.from_torrentdictionary(
-            client.torrents.info(torrent_hashes=ident)[0]
+        return TorrentInfo.from_torrentdict(
+            client.torrents.info(torrent_hashes=ident, SIMPLE_RESPONSES=True)[0]
         )
 
     def get_or_none(
