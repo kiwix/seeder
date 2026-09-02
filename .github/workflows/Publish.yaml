@@ -1,0 +1,94 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+
+  build-binary:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          # building on ubuntu-22.04 so we'll link to glibc 2.35 (bookworm+)
+          - image: ubuntu-22.04
+            name: linux-x86_64
+          - image: ubuntu-22.04-arm
+            name: linux-arm64
+          - image: macos-15-intel
+            name: macos-x86_64
+          - image: macos-15
+            name: macos-arm64
+    runs-on: ${{ matrix.target.image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v4
+      - name: Update environ (filename)
+        shell: python
+        env:
+          TNAME: ${{ matrix.target.name }}
+          KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
+        run: |
+          import os
+          import sys
+          if os.getenv("GITHUB_REF_TYPE") != "tag":
+              print("cannot release outside a tag")
+              sys.exit(1)
+
+          tag = os.getenv("GITHUB_REF_NAME", "unknown")
+          tname = os.getenv("TNAME", "unknown")
+          env = {"BIN_FILENAME": f"kiwix-seeder_{tname}_{tag}", "KIWIX_FILE_UPLOAD_SSH_KEY_PATH": os.getenv('KIWIX_FILE_UPLOAD_SSH_KEY_PATH', '/tmp/missing')}
+          with open(os.getenv("GITHUB_ENV"), "a") as fh:
+            for name, value in env.items():
+              fh.write(f"{name}={value}\n")
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y python3-dev patchelf ccache build-essential
+      - name: Install python dependencies
+        run: |
+          pip install -U pip
+          pip install .[scripts,binary]
+      - name: Build binary
+        run: invoke binary --filename "/tmp/$BIN_FILENAME"
+      - name: Test binary is able to start
+        run: /tmp/$BIN_FILENAME -V
+
+      - name: Write SSH key
+        shell: bash
+        run: |
+          echo "${{secrets.KIWIXSEEDER_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+
+      - name: Upload binary to release server
+        run: |
+          echo "Uploading ${{ env.BIN_FILENAME }} to download.kiwix.org"
+          scp -i "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}" -v "/tmp/${{ env.BIN_FILENAME }}" kiwix-seeder@master.download.kiwix.org:30322/data/kiwix/release/kiwix-seeder/${{ env.BIN_FILENAME }}"
+          echo "### Artefacts" >> $GITHUB_STEP_SUMMARY
+          echo "- [${{ env.BIN_FILENAME }}](https://mirror.download.kiwix.org/release/kiwix-seeder/${{ env.BIN_FILENAME }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Remove SSH Key
+        if: always()
+        run: rm -f "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}"
+
+  docker:
+    name: Deploy Seeder Image
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@7
+      - name: Publish Docker Image
+        uses: openzim/docker-publish-action@v10
+        with:
+          image-name: kiwix/bittorrent-seeder
+          tag-pattern: /^([0-9.]+)$/
+          latest-on-tag: true
+          restrict-to: kiwix/seeder
+          platforms: |
+            linux/amd64
+            linux/arm64
+          registries: ghcr.io
+          credentials:
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
