@@ -90,7 +90,7 @@ jobs:
         if: env.PUBLISH_MODE == 'release'
         run: |
           echo "Uploading ${{ env.BIN_FILENAME }} to download.kiwix.org"
-          scp -i "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}" -v "/tmp/${{ env.BIN_FILENAME }}" kiwix-seeder@master.download.kiwix.org:30322/data/kiwix/release/kiwix-seeder/${{ env.BIN_FILENAME }}"
+          scp -i "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}" -v "/tmp/${{ env.BIN_FILENAME }}" "kiwix-seeder@master.download.kiwix.org:30322/data/kiwix/release/kiwix-seeder/${{ env.BIN_FILENAME }}"
           echo "### Artefacts" >> $GITHUB_STEP_SUMMARY
           echo "- [${{ env.BIN_FILENAME }}](https://mirror.download.kiwix.org/release/kiwix-seeder/${{ env.BIN_FILENAME }})" >> $GITHUB_STEP_SUMMARY
 
@@ -98,7 +98,7 @@ jobs:
         if: env.PUBLISH_MODE == 'nightly'
         run: |
           echo "Uploading ${{ env.BIN_FILENAME }} to download.kiwix.org"
-          scp -i "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}" -v "/tmp/${{ env.BIN_FILENAME }}" kiwix-seeder@master.download.kiwix.org:30322/data/kiwix/nightly/${{ env.VERSION }}/${{ env.BIN_FILENAME }}"
+          scp -i "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}" -v "/tmp/${{ env.BIN_FILENAME }}" "kiwix-seeder@master.download.kiwix.org:30322/data/kiwix/nightly/${{ env.VERSION }}/${{ env.BIN_FILENAME }}"
           echo "### Artefacts" >> $GITHUB_STEP_SUMMARY
           echo "- [${{ env.BIN_FILENAME }}](https://mirror.download.kiwix.org/nightly/${{ env.VERSION }}/${{ env.BIN_FILENAME }})" >> $GITHUB_STEP_SUMMARY
 
