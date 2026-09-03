@@ -68,6 +68,7 @@ jobs:
             for name, value in env.items():
               fh.write(f"{name}={value}\n")
       - name: Install system dependencies
+        if: ${{ startsWith(matrix.target.name, 'linux') }}
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y python3-dev patchelf ccache build-essential
