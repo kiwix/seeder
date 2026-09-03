@@ -43,6 +43,7 @@ jobs:
           TNAME: ${{ matrix.target.name }}
           KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
         run: |
+          import datetime
           import os
           import sys
           publish_mode = os.getenv("PUBLISH_MODE")
