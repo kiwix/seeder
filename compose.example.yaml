@@ -1,0 +1,51 @@
+# this is an example compose file that needs to be tweaked
+# the qbittorrent service will generate a random password on start and
+# display it in the logs. Use it to log-in via the WebUI and change it.
+# Once changed, you can set the QBT_URL environ variable for the seeder.
+---
+services:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      # change to yours
+      - TZ=Etc/UTC
+      # control which port to open on your host for webui.
+      # if changed, change ports: as well
+      - WEBUI_PORT=8080
+      # if your connection is behind a NAT, check your router to ensure
+      # either this port or another one can reach your host (TCP+UDP)
+      # if changed, change ports: as well
+      - TORRENTING_PORT=6881
+    volumes:
+      # where to store qbittorrent config
+      - ./qbt-config:/config
+      # where to store the actual ZIM files
+      - ./files:/downloads
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    stop_grace_period: "10s"
+    restart: unless-stopped
+  seeder:
+    # use any release as tag, latest for latest release or develop for trunk
+    # image: ghcr.io/kiwix/bittorrent-seeder:latest
+    image: btseeder
+    container_name: seeder
+    environment:
+      # change if/when you changed credentials
+      - QBT_USERNAME=admin
+      - QBT_PASSWORD=password
+      # this is the name of the service above
+      - QBT_HOST=qbittorrent
+      # change to the exposed port that talks to WEBUI_PORT if you changed it
+      - QBT_PORT=8080
+      # leave it enabled as you're using HTTP
+      - QBT_INSECURE=y
+      # add any filter you want (use --help)
+      - MAX_SIZE=100MiB
+      - LANGUAGES=bam
+      # pause delay between kiwix-seeder runs
+      - SLEEP_INTERVAL=2m
+    command: ["kiwix-seeder-loop"]

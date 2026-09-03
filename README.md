@@ -128,6 +128,9 @@ docker run -it \
 	ghcr.io/kiwix/seeder:latest kiwix-seeder
 ```
 
+> [!NOTE]
+> We have a `compose.example.yaml` file to help you get started with a seeder + qBittorrent docker setup.
+
 ### Source (Python)
 
 Assuming you have [`uv`](https://docs.astral.sh/uv/) installed
