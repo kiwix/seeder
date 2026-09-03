@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Self
 
 import qbittorrentapi
+from qbittorrentapi.torrents import TorrentsAddedMetadata
 
 from kiwixseeder.context import QBT_CAT_NAME, Context
 from kiwixseeder.download import get_btih_from_url
@@ -25,6 +26,17 @@ class TorrentInfo:
     size: int
 
     @classmethod
+    def from_torrentdict(cls, tdict: dict[str, str | int]) -> Self:
+        return cls(
+            btih=str(tdict["hash"]),
+            filename=str(tdict["name"]),
+            added_on=datetime.datetime.fromtimestamp(
+                int(tdict["added_on"]), tz=datetime.UTC
+            ),
+            size=int(tdict["size"]),
+        )
+
+    @classmethod
     def from_torrentdictionary(cls, tdict: qbittorrentapi.TorrentDictionary) -> Self:
         return cls(
             btih=tdict.properties.hash,
@@ -43,7 +55,6 @@ class TorrentInfo:
 
 
 class TorrentManager:
-
     def __init__(self) -> None:
         # maps {ident: str} to {btih: str}
         self.btihs: dict[str, str] = {}
@@ -63,8 +74,10 @@ class TorrentManager:
     def reload(self):
         """read torrents list from qbittorrent"""
         self.btihs.clear()
-        for torrent in client.torrents.info(category=QBT_CAT_NAME):
-            self.btihs[torrent.properties.hash] = torrent.properties.name
+        for torrent in client.torrents.info(
+            category=QBT_CAT_NAME, SIMPLE_RESPONSES=True
+        ):
+            self.btihs[str(torrent["hash"])] = str(torrent["name"])
 
     @property
     def nb_torrents(self) -> int:
@@ -87,9 +100,10 @@ class TorrentManager:
         # download_path
         try:
             btih = btih or get_btih_from_url(url)
-            if client.torrents.add(
-                urls=url, category=QBT_CAT_NAME
-            ) == "Ok." and self.get_or_none(btih, with_patience=True):
+            resp = client.torrents.add(urls=url, category=QBT_CAT_NAME)
+            if (
+                isinstance(resp, TorrentsAddedMetadata) or resp == "Ok."
+            ) and self.get_or_none(btih, with_patience=True):
                 return btih
             raise OSError(f"Failed to add torrent for {url}")
         finally:
@@ -97,8 +111,8 @@ class TorrentManager:
 
     def get(self, ident: str) -> TorrentInfo:
         """Torrent dict from its hash"""
-        return TorrentInfo.from_torrentdictionary(
-            client.torrents.info(torrent_hashes=ident)[0]
+        return TorrentInfo.from_torrentdict(
+            client.torrents.info(torrent_hashes=ident, SIMPLE_RESPONSES=True)[0]  # pyright: ignore[reportUnknownArgumentType, reportArgumentType]
         )
 
     def get_or_none(

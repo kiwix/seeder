@@ -1,0 +1,125 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  schedule:
+   - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+
+  build-binary:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          # building on ubuntu-22.04 so we'll link to glibc 2.35 (bookworm+)
+          - image: ubuntu-22.04
+            name: linux-x86_64
+          - image: ubuntu-22.04-arm
+            name: linux-arm64
+          - image: macos-15-intel
+            name: macos-x86_64
+          - image: macos-15
+            name: macos-arm64
+    runs-on: ${{ matrix.target.image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+
+      - name: Mark workflow a release one
+        if: github.event_name == 'release'
+        run: echo "PUBLISH_MODE=release" >> $GITHUB_ENV
+      - name: Mark workflow a nightly one
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: echo "PUBLISH_MODE=nightly" >> $GITHUB_ENV
+      
+      - name: Update environment
+        shell: python
+        env:
+          TNAME: ${{ matrix.target.name }}
+          KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
+        run: |
+          import os
+          import sys
+          publish_mode = os.getenv("PUBLISH_MODE")
+          if publish_mode == "release" and os.getenv("GITHUB_REF_TYPE") != "tag":
+              print("cannot release outside a tag")
+              sys.exit(1)
+
+          if publish_mode not in ("release", "nightly"):
+            print("unsupported publish mode", os.getenv("PUBLISH_MODE"))
+            sys.exit(1)
+
+          if publish_mode == "release":
+            version = os.getenv("GITHUB_REF_NAME", "unknown")
+          else:
+            version = datetime.date.today().strftime("%Y-%m-%d")
+
+          tname = os.getenv("TNAME", "unknown")
+          env = {"BIN_FILENAME": f"kiwix-seeder_{tname}_{version}",
+                 "VERSION": version,
+                 "KIWIX_FILE_UPLOAD_SSH_KEY_PATH": os.getenv('KIWIX_FILE_UPLOAD_SSH_KEY_PATH', '/tmp/missing')}
+          with open(os.getenv("GITHUB_ENV"), "a") as fh:
+            for name, value in env.items():
+              fh.write(f"{name}={value}\n")
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y python3-dev patchelf ccache build-essential
+      - name: Install python dependencies
+        run: |
+          pip install -U pip
+          pip install .[scripts,build]
+      - name: Build binary
+        run: invoke binary --filename "/tmp/$BIN_FILENAME"
+      - name: Test binary is able to start
+        run: /tmp/$BIN_FILENAME --version
+
+      - name: Write SSH key
+        shell: bash
+        run: |
+          echo "${{secrets.KIWIXSEEDER_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+
+      - name: Upload binary to release server
+        if: env.PUBLISH_MODE == 'release'
+        run: |
+          echo "Uploading ${{ env.BIN_FILENAME }} to download.kiwix.org"
+          scp -i "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}" -v "/tmp/${{ env.BIN_FILENAME }}" kiwix-seeder@master.download.kiwix.org:30322/data/kiwix/release/kiwix-seeder/${{ env.BIN_FILENAME }}"
+          echo "### Artefacts" >> $GITHUB_STEP_SUMMARY
+          echo "- [${{ env.BIN_FILENAME }}](https://mirror.download.kiwix.org/release/kiwix-seeder/${{ env.BIN_FILENAME }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload binary to nightlies server
+        if: env.PUBLISH_MODE == 'nightly'
+        run: |
+          echo "Uploading ${{ env.BIN_FILENAME }} to download.kiwix.org"
+          scp -i "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}" -v "/tmp/${{ env.BIN_FILENAME }}" kiwix-seeder@master.download.kiwix.org:30322/data/kiwix/nightly/${{ env.VERSION }}/${{ env.BIN_FILENAME }}"
+          echo "### Artefacts" >> $GITHUB_STEP_SUMMARY
+          echo "- [${{ env.BIN_FILENAME }}](https://mirror.download.kiwix.org/nightly/${{ env.VERSION }}/${{ env.BIN_FILENAME }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Remove SSH Key
+        if: always()
+        run: rm -f "${KIWIX_FILE_UPLOAD_SSH_KEY_PATH}"
+
+  docker:
+    name: Deploy Seeder Image
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@7
+      - name: Publish Docker Image
+        uses: openzim/docker-publish-action@v10
+        with:
+          image-name: kiwix/bittorrent-seeder
+          tag-pattern: /^([0-9.]+)$/
+          latest-on-tag: true
+          restrict-to: kiwix/seeder
+          platforms: |
+            linux/amd64
+            linux/arm64
+          registries: ghcr.io
+          credentials:
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}

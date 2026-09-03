@@ -42,9 +42,6 @@ DEFAULT_SLEEP_INTERVAL: float = humanfriendly.parse_timespan(
 )
 
 DEFAULT_BATCH_SIZE: int = int(os.getenv("BATCH_SIZE") or "100")
-DEFAULT_BATCH_INTERVAL: float = humanfriendly.parse_timespan(
-    os.getenv("BATCH_INTERVAL") or "1m"
-)
 
 DEFAULT_FILTER_FILENAMES: set[str] = set_from_env("FILENAMES")
 DEFAULT_FILTER_LANGUAGES: set[str] = set_from_env("LANGUAGES")
@@ -144,7 +141,6 @@ class Context:
     is_nix: bool = platform.system() not in ("Darwin", "Windows")
 
     batch_size: int = DEFAULT_BATCH_SIZE
-    batch_interval: float = DEFAULT_BATCH_INTERVAL
 
     catalog_url: str = CATALOG_URL
     download_url: str = DOWNLOAD_URL

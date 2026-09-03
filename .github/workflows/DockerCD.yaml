@@ -3,7 +3,7 @@ name: Docker CD
 on:
   push:
     branches:
-      - 'main'
+      - 'updates'
   workflow_dispatch:
 
 jobs:
@@ -17,9 +17,13 @@ jobs:
         uses: openzim/docker-publish-action@v10
         with:
           image-name: kiwix/bittorrent-seeder
-          on-master: latest
+          on-master: develop
           restrict-to: kiwix/seeder
+          platforms: |
+            linux/amd64
+            linux/arm64
           registries: ghcr.io
+          manual-tag: updates
           credentials:
             GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
             GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}

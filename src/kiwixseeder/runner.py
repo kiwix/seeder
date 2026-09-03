@@ -1,5 +1,8 @@
 import datetime
 import fnmatch
+from http import HTTPStatus
+
+from requests.exceptions import HTTPError
 
 from kiwixseeder.context import (
     QBT_CAT_NAME,
@@ -7,16 +10,21 @@ from kiwixseeder.context import (
     RC_NOFILTER,
     Context,
 )
-from kiwixseeder.library import Book, Catalog, query_etag, write_etag_to_cache
+from kiwixseeder.library import (
+    ETAG_CACHE_FILE,
+    Book,
+    Catalog,
+    query_etag,
+    write_etag_to_cache,
+)
 from kiwixseeder.qbittorrent import TorrentManager
-from kiwixseeder.utils import format_duration, format_size, sleep_nonblocking
+from kiwixseeder.utils import format_size
 
 context = Context.get()
 logger = context.logger
 
 
 class Runner:
-
     def __init__(self) -> None:
         self.exit_requested: bool = False
         self.now = datetime.datetime.now(datetime.UTC)
@@ -50,13 +58,17 @@ class Runner:
             write_etag_to_cache("")
 
         if self.fetch_catalog() and not context.dry_run:
-            logger.info("Catalog has not changed since last run, exiting.")
+            logger.info(
+                "Catalog has not changed since last run, exiting "
+                f"–– {context.get_cache_path(ETAG_CACHE_FILE)}"  # noqa: RUF001
+            )
             return 0
         catalog_size = self.catalog.nb_books
         self.reduce_catalog()
 
         # make sure it's not an accidental no-param call
         books_size = sum(book.size for book in self.books)
+        logger.debug(f"Catalog size: {format_size(books_size)}")
         if len(self.books) == catalog_size and not context.all_good:
             logger.warning(
                 f"{self.banner}You requesting seeding {len(self.books)} torrents "
@@ -73,13 +85,15 @@ class Runner:
             return 0
 
         # read existing torrents from qbt
+        logger.info("Querying qBittorrent state…")
         self.manager.reload()
         logger.info(
             f"{self.banner}There are {self.manager.nb_torrents} torrents "
             f"in {QBT_CAT_NAME}"
         )
-        for btih in self.manager.btihs:
-            logger.debug(f"* {self.manager.get(btih)!s}")
+        if context.debug:
+            for btih in self.manager.btihs:
+                logger.debug(f"* {self.manager.get(btih)!s}")
 
         self.remove_outdated_torrents()
         self.reconcile_books_and_torrents()
@@ -169,7 +183,7 @@ class Runner:
             if self.manager.get(btih).added_on <= keep_until:
                 unselected_books.remove(btih)
 
-        if not len(unselected_books):
+        if not unselected_books:
             logger.info("> None")
             return
 
@@ -205,9 +219,19 @@ class Runner:
         logger.info(
             "Reconciling books and torrents (may require btih endpoint requests)"
         )
-        self.books = [
-            book for book in self.books if book.btih not in self.manager.btihs
-        ]
+        for book in list(self.books):
+            try:
+                if book.btih in self.manager.btihs:
+                    self.books.remove(book)
+            except HTTPError as exc:
+                self.books.remove(book)
+                if getattr(exc.response, "status_code", None) == HTTPStatus.NOT_FOUND:
+                    logger.warning(
+                        f"{HTTPStatus.NOT_FOUND!s} on {book.torrent_url}."
+                        " Ignoring. See https://github.com/openzim/cms/issues/103"
+                    )
+                    continue
+                raise exc
 
     def add_books(self):
         logger.info(f"{self.banner}Adding {len(self.books)} torrents…")
@@ -219,17 +243,6 @@ class Runner:
                 logger.info(f"{num}. Added {book!s}")
             else:
                 logger.error(f"Failed to add {book!s}")
-
-            if (
-                len(self.books) > context.batch_size
-                and num < len(self.books) - 1
-                and (num + 1) % context.batch_size == 0
-            ):
-                logger.info(
-                    f"Pausing for {format_duration(context.batch_interval)} "
-                    f"after {context.batch_size} additions, to let qBittorrent breath"
-                )
-                sleep_nonblocking(context.batch_interval)
 
     def matches_filename(self, book: Book) -> bool:
         if not context.filenames:
