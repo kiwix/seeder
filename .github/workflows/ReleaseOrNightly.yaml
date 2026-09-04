@@ -85,6 +85,7 @@ jobs:
         shell: bash
         run: |
           echo "${{secrets.KIWIXSEEDER_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+          chmod 600 $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
 
       - name: Upload binary to release server
         if: env.PUBLISH_MODE == 'release'
