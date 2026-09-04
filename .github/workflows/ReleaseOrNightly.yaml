@@ -110,6 +110,7 @@ jobs:
   docker:
     name: Deploy Seeder Image
     runs-on: ubuntu-26.04
+    if: github.event_name == 'release'
     steps:
       - uses: actions/checkout@v7
       - name: Publish Docker Image
