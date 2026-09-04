@@ -116,6 +116,13 @@ Uses latest release
 kiwix-seeder --help
 ```
 
+> [!WARN]
+> **macOS user**, the binaries are not signed nor notarized ([#20](https://github.com/kiwix/seeder/issues/20)). You need to remove the quarantine first.
+
+```sh
+sudo /usr/bin/xattr -r -d com.apple.quarantine ./kiwix-seeder_macos-*
+```
+
 ### Docker
 
 Assuming you have [Podman](https://podman.io/) or a compatible alternative installed. You can also use `:develop` tag for unreleased version.
