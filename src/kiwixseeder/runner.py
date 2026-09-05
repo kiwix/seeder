@@ -92,8 +92,8 @@ class Runner:
             f"in {QBT_CAT_NAME}"
         )
         if context.debug:
-            for btih in self.manager.btihs:
-                logger.debug(f"* {self.manager.get(btih)!s}")
+            for torrent in self.manager.get_all():
+                logger.debug(f"* {torrent!s}")
 
         self.remove_outdated_torrents()
         self.reconcile_books_and_torrents()
@@ -162,10 +162,11 @@ class Runner:
 
         # reconciling existing torrents and books
         unselected_books = list(self.manager.btihs.keys())
+        all_btihs = self.manager.btihs.items()
         for book in self.books:
             btihs = [
                 btih
-                for btih, fname in self.manager.btihs.items()
+                for btih, fname in all_btihs
                 # having condition on name first is important and it allows
                 # us to only compare on btih if name matches.
                 # we cant direclty compare on btih as it would require getting the
@@ -177,26 +178,41 @@ class Runner:
                 book.btih = btihs[0]
                 unselected_books.remove(book.btih)
 
+        # get added_on for all btih
+        all_added_ts: dict[str, int] = dict(
+            zip(
+                unselected_books,
+                self.manager.get_all_added_ts(unselected_books),
+                strict=False,
+            )
+        )
         # keep those that are within --keep duration
-        keep_until = self.now - datetime.timedelta(seconds=context.keep_for)
+        keep_until = (
+            self.now - datetime.timedelta(seconds=context.keep_for)
+        ).timestamp()
         for btih in unselected_books:
-            if self.manager.get(btih).added_on <= keep_until:
+            # keep (remove from unselected) is added to BT after that date in the past
+            if all_added_ts[btih] > keep_until:
                 unselected_books.remove(btih)
+            else:
+                logger.error(
+                    f"{self.manager.get(btih).added_on} is before {keep_until}"
+                )
 
         if not unselected_books:
             logger.info("> None")
             return
 
         logger.info(
-            f"{self.banner}Removing {len(unselected_books)} outdated torrents "
-            "(not in catalog, over --keep)…"
+            f"{self.banner}Removing {len(unselected_books)} torrents: "
+            "outside filters or not in catalog and anterior to --keep"
         )
-        for btih in unselected_books:
-            logger.info(f"- {self.manager.get(btih)!s}")
+        for torrent in self.manager.get_all(btihs=unselected_books):
+            logger.info(f"- {torrent!s}")
             if context.dry_run:
                 continue
-            if not self.manager.remove(btih):
-                logger.error(f"Failed to remove {btih}")
+            if not self.manager.remove(torrent.btih):
+                logger.error(f"Failed to remove {torrent.btih}")
 
     def ensure_storage(self):
         torrents_size = self.manager.total_size
@@ -213,6 +229,8 @@ class Runner:
 
         if total_size > context.max_storage:
             logger.error("Total size exceeds max-storage")
+            if context.dry_run:
+                logger.error(">> does not account removal in dry-mode")
             return True
 
     def reconcile_books_and_torrents(self):

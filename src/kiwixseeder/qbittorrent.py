@@ -1,5 +1,8 @@
+# pyright: reportUnknownMemberType=false, reportArgumentType=false, reportUnknownArgumentType=false, reportUnknownParameterType=false, reportUnknownVariableType=false, reportMissingImports=false
+
 import datetime
 import time
+from collections.abc import Generator
 from dataclasses import dataclass
 from typing import Self
 
@@ -109,10 +112,26 @@ class TorrentManager:
         finally:
             self.reload()
 
+    def get_all_added_ts(self, btihs: list[str]) -> list[int]:
+        """added-on timestamps for a list of btihs"""
+        return [
+            int(tdict["added_on"])
+            for tdict in client.torrents.info(
+                torrent_hashes=btihs, SIMPLE_RESPONSES=True
+            )
+        ]
+
+    def get_all(self, btihs: list[str] | None = None) -> Generator[TorrentInfo]:
+        """TorrentInfo for all btihs or a supplied list of them"""
+        if not btihs:
+            btihs = list(self.btihs.keys())
+        for tdict in client.torrents.info(torrent_hashes=btihs, SIMPLE_RESPONSES=True):
+            yield TorrentInfo.from_torrentdict(tdict)
+
     def get(self, ident: str) -> TorrentInfo:
         """Torrent dict from its hash"""
         return TorrentInfo.from_torrentdict(
-            client.torrents.info(torrent_hashes=ident, SIMPLE_RESPONSES=True)[0]  # pyright: ignore[reportUnknownArgumentType, reportArgumentType]
+            client.torrents.info(torrent_hashes=ident, SIMPLE_RESPONSES=True)[0]
         )
 
     def get_or_none(
@@ -146,4 +165,11 @@ class TorrentManager:
     def total_size(self) -> int:
         """total size of our torrents"""
         self.reload()
-        return sum(self.get(btih).size for btih in self.btihs)
+        return sum(
+            [
+                int(tdict["size"])
+                for tdict in client.torrents.info(
+                    torrent_hashes=self.btihs, SIMPLE_RESPONSES=True
+                )
+            ]
+        )
