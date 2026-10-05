@@ -8,9 +8,11 @@ import requests
 import requests.adapters
 from urllib3.util.retry import Retry
 
+from kiwixseeder.__about__ import __version__
 from kiwixseeder.context import Context
 
 session = requests.Session()
+session.headers.update({"User-Agent": f"kiwix-bot/{__version__} (seeder)"})
 # basic urllib retry mechanism.
 # Sleep (seconds): {backoff factor} * (2 ** ({number of total retries} - 1))
 # https://docs.descarteslabs.com/_modules/urllib3/util/retry.html
