@@ -20,9 +20,12 @@ def set_from_env(name: str) -> set[str]:
 NAME = "kiwix-seeder"  # must be filesystem-friendly (technical)
 CLI_NAME = "kiwix-seeder"
 HUMAN_NAME = "Kiwix Seeder"
-QBT_CAT_NAME = "kiwix-seeder"  # name of category to group our torrents in
 RC_NOFILTER = 32  # exit-code when user has no filter and did not confirm
 RC_INSUFFICIENT_STORAGE = 30  # exit-code when store is not enough for selection
+
+# name of qBittorrent category to group our torrents in; allows to have multiple
+# kiwix-seeder interacting with a single QBittorrent for instance
+QBT_CAT_NAME = os.getenv("QBT_CAT_NAME", "kiwix-seeder")
 
 CATALOG_URL = os.getenv("CATALOG_URL", "https://opds.library.kiwix.org/catalog/v2")
 DOWNLOAD_URL = os.getenv("DOWNLOAD_URL", "https://lb.download.kiwix.org")
